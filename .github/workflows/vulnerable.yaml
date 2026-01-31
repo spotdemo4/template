@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   flake:
-    runs-on: niubuntu-latestx
+    runs-on: ubuntu-latestx
     steps:
       - name: Checkout
         uses: spotdemo4/nix-init@df23370aceae9a7becda32705c2bc6eb7bc6174e # v1.23.0
