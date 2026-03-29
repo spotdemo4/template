@@ -22,22 +22,11 @@
 
   outputs =
     {
-      nixpkgs,
       trev,
       ...
     }:
     trev.libs.mkFlake (
-      system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            trev.overlays.packages
-            trev.overlays.libs
-          ];
-        };
-      in
-      {
+      system: pkgs: {
         devShells = {
           default = pkgs.mkShell {
             shellHook = pkgs.shellhook.ref;
@@ -82,7 +71,7 @@
           };
         };
 
-        checks = pkgs.lib.mkChecks {
+        checks = pkgs.mkChecks {
           actions = {
             root = ./.;
             fileset = ./.github/workflows;
@@ -91,8 +80,8 @@
               octoscan
             ];
             forEach = ''
-              action-validator $file
-              octoscan scan $file
+              action-validator "$file"
+              octoscan scan "$file"
             '';
           };
 
