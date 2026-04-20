@@ -38,7 +38,6 @@
               # util
               bumper
               flake-release
-              renovate
             ];
           };
 
@@ -62,11 +61,8 @@
 
           vulnerable = pkgs.mkShell {
             packages = with pkgs; [
-              # flake
-              flake-checker
-
-              # actions
-              octoscan
+              flake-checker # flake
+              octoscan # actions
             ];
           };
         };
@@ -74,8 +70,8 @@
         checks = pkgs.mkChecks {
           actions = {
             root = ./.;
-            fileset = ./.github/workflows;
-            deps = with pkgs; [
+            files = ./.github/workflows;
+            packages = with pkgs; [
               action-validator
               octoscan
             ];
@@ -87,8 +83,8 @@
 
           renovate = {
             root = ./.github;
-            fileset = ./.github/renovate.json;
-            deps = with pkgs; [
+            files = ./.github/renovate.json;
+            packages = with pkgs; [
               renovate
             ];
             script = ''
@@ -99,7 +95,7 @@
           nix = {
             root = ./.;
             filter = file: file.hasExt "nix";
-            deps = with pkgs; [
+            packages = with pkgs; [
               nixfmt
             ];
             forEach = ''
@@ -110,7 +106,7 @@
           prettier = {
             root = ./.;
             filter = file: file.hasExt "yaml" || file.hasExt "json" || file.hasExt "md";
-            deps = with pkgs; [
+            packages = with pkgs; [
               prettier
             ];
             forEach = ''
@@ -119,8 +115,8 @@
           };
         };
 
-        schemas = trev.schemas;
         formatter = pkgs.nixfmt-tree;
+        schemas = trev.schemas;
       }
     );
 }
