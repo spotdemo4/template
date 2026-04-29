@@ -11,7 +11,7 @@
   };
 
   inputs = {
-    systems.url = "github:nix-systems/default";
+    systems.url = "github:spotdemo4/systems";
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     trev = {
       url = "github:spotdemo4/nur";
@@ -27,17 +27,22 @@
     }:
     trev.libs.mkFlake (
       system: pkgs: {
+
+        # nix develop [#...]
         devShells = {
           default = pkgs.mkShell {
             shellHook = pkgs.shellhook.ref;
             packages = with pkgs; [
-              # formatters
-              nixfmt
+              # lint
+              nixd
+
+              # format
+              treefmt
               prettier
+              nixfmt
 
               # util
               bumper
-              flake-release
             ];
           };
 
@@ -61,16 +66,48 @@
 
           vulnerable = pkgs.mkShell {
             packages = with pkgs; [
-              flake-checker # flake
+              flake-checker # nix
               zizmor # actions
             ];
           };
         };
 
+        # nix fmt
+        formatter = pkgs.treefmt.withConfig {
+          configFile = ./treefmt.toml;
+          runtimeInputs = with pkgs; [
+            prettier
+            nixfmt
+          ];
+        };
+
+        # nix flake check
         checks = pkgs.mkChecks {
-          actions = {
+          prettier = {
             root = ./.;
-            files = ./.github/workflows;
+            filter = file: file.hasExt "yaml" || file.hasExt "json" || file.hasExt "md";
+            packages = with pkgs; [
+              prettier
+            ];
+            forEach = ''
+              prettier --check "$file"
+            '';
+          };
+
+          nix = {
+            root = ./.;
+            filter = file: file.hasExt "nix";
+            packages = with pkgs; [
+              nixfmt
+            ];
+            forEach = ''
+              nixfmt --check "$file"
+            '';
+          };
+
+          actions = {
+            root = ./.github/workflows;
+            filter = file: file.hasExt "yaml";
             packages = with pkgs; [
               action-validator
               zizmor
@@ -91,32 +128,7 @@
               renovate-config-validator renovate.json
             '';
           };
-
-          nix = {
-            root = ./.;
-            filter = file: file.hasExt "nix";
-            packages = with pkgs; [
-              nixfmt
-            ];
-            forEach = ''
-              nixfmt --check "$file"
-            '';
-          };
-
-          prettier = {
-            root = ./.;
-            filter = file: file.hasExt "yaml" || file.hasExt "json" || file.hasExt "md";
-            packages = with pkgs; [
-              prettier
-            ];
-            forEach = ''
-              prettier --check "$file"
-            '';
-          };
         };
-
-        formatter = pkgs.nixfmt-tree;
-        schemas = trev.schemas;
       }
     );
 }
