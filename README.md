@@ -18,6 +18,12 @@ part of [spotdemo4/templates](https://github.com/spotdemo4/templates)
 nix develop
 ```
 
+### format
+
+```elm
+nix fmt
+```
+
 ### check
 
 ```elm
