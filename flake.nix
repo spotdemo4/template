@@ -90,7 +90,7 @@
             packages = with pkgs; [
               nixfmt
             ];
-            forEach = ''
+            script = ''
               nixfmt --check "$file"
             '';
           };
@@ -102,7 +102,7 @@
               action-validator
               zizmor
             ];
-            forEach = ''
+            script = ''
               action-validator "$file"
               zizmor --offline "$file"
             '';
