@@ -1,0 +1,36 @@
+name: vulnerable
+
+on:
+  schedule:
+    - cron: "0 9 * * 0" # every Sunday at 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actions:
+    runs-on: ubuntu-26.04
+    permissions:
+      id-token: write
+    steps:
+      - name: Initialize
+        uses: spotdemo4/nix-init@a09ea83c7aa7f99a6832771f7b7cb3a764ade52f # v1.71.0
+        with:
+          shell: vulnerable
+
+      - name: Run zizmor
+        run: zizmor $(find .github/workflows -name "*.yaml")
+
+  nix:
+    runs-on: ubuntu-26.04
+    permissions:
+      id-token: write
+    steps:
+      - name: Initialize
+        uses: spotdemo4/nix-init@a09ea83c7aa7f99a6832771f7b7cb3a764ade52f # v1.71.0
+        with:
+          shell: vulnerable
+
+      - name: Run flake-checker
+        run: flake-checker -f

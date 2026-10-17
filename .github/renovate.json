@@ -1,0 +1,35 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-global-schema.json",
+
+  // self-hosted
+  "onboarding": false,
+  "requireConfig": "ignored",
+  "platform": "github",
+  "repositories": ["spotdemo4/template"],
+
+  // repository
+  "extends": ["config:recommended"],
+  "addLabels": ["dep"],
+  "nix": {
+    "enabled": true
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["* * * * 0"] // sunday
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    },
+    {
+      "matchManagers": ["nix"],
+      "addLabels": ["nix"]
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "addLabels": ["actions"]
+    }
+  ]
+}

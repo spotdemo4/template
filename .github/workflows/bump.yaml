@@ -1,0 +1,43 @@
+name: bump
+
+on:
+  # schedule:
+  #   - cron: "0 22 * * 1-5" # every weekday at 22:00 UTC
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "force"
+        required: false
+        type: choice
+        default: "true"
+        options:
+          - "true"
+          - "false"
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  bump:
+    runs-on: ubuntu-26.04
+    permissions:
+      id-token: write
+    steps:
+      - id: init
+        name: Initialize
+        uses: spotdemo4/nix-init@a09ea83c7aa7f99a6832771f7b7cb3a764ade52f # v1.71.0
+        with:
+          app_id: ${{ vars.CLIENT_ID }}
+          app_key: ${{ secrets.PRIVATE_KEY }}
+          fetch_depth: 0
+          shell: bump
+
+      - name: Bump
+        run: bumper
+        env:
+          GITHUB_TOKEN: ${{ steps.init.outputs.token }}
+          FORCE: ${{ inputs.force }}

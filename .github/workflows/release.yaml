@@ -1,0 +1,31 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-26.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Initialize
+        uses: spotdemo4/nix-init@a09ea83c7aa7f99a6832771f7b7cb3a764ade52f # v1.71.0
+        with:
+          fetch_depth: 0
+          shell: release
+
+      - name: Release to GitHub
+        run: flake-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
