@@ -22,6 +22,7 @@
 
   outputs =
     {
+      self,
       trevpkgs,
       ...
     }:
@@ -104,6 +105,20 @@
 
         # nix flake check
         checks = pkgs.mkChecks {
+          init = {
+            root = ./.;
+            packages = with pkgs; [
+              git
+              jq
+              shellcheck
+              self.formatter.${system}
+            ];
+            script = ''
+              shellcheck init.sh init.test.sh
+              bash init.test.sh
+            '';
+          };
+
           nix = {
             root = ./.;
             filter = file: file.hasExt "nix";
