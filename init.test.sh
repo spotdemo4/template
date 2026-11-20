@@ -124,8 +124,8 @@ test_application() (
   git add -A
   git commit --quiet --message 'Initial commit'
   # The build sandbox has no /usr/bin/env for the shebang
-  # GitHub (detected), no Gitea, Forgejo mirror, Zed, VS Code
-  printf '%s\n' '' n y https://git.example.com/octo/hello-world '' '' | bash ./init.sh 'Hello World' "$description"
+  # GitHub (detected), no Gitea, Forgejo mirror, Zed, VS Code, Claude Code
+  printf '%s\n' '' n y https://git.example.com/octo/hello-world '' '' '' | bash ./init.sh 'Hello World' "$description"
 
   assert_initialized test@example.com
   assert_eq "$(git remote)" $'forgejo\norigin' remotes
@@ -144,6 +144,8 @@ test_application() (
     '"endpoint": "https://git.example.com/api/v1"' \
     '"repositories": ["octo/hello-world"]'
   [[ -d .zed && -d .vscode ]] || fail 'editor settings are missing'
+  assert_eq "$(git ls-files .claude)" .claude/skills 'tracked .claude files'
+  assert_eq "$(readlink .claude/skills)" ../.agents/skills '.claude/skills target'
 )
 
 test_flake_init() (
@@ -152,12 +154,13 @@ test_flake_init() (
   cd "$project"
   # nix flake init leaves the template uncommitted and init.sh not executable
   chmod -x init.sh
-  # Forgejo (detected), no GitHub, no Gitea, no Zed, no VS Code
-  printf '%s\n' '' n n n n | bash init.sh 'Hello Forgejo' 'Says hello'
+  # Forgejo (detected), no GitHub, no Gitea, no Zed, no VS Code, no Claude Code
+  printf '%s\n' '' n n n n n | bash init.sh 'Hello Forgejo' 'Says hello'
 
   assert_initialized test@example.com
   assert_eq "$(git remote)" origin remotes
-  assert_missing .github .gitea .zed .vscode
+  assert_missing .github .gitea .zed .vscode .claude
+  [[ -f .agents/skills/template-sync/SKILL.md ]] || fail '.agents/skills is missing'
   assert_contains README.md \
     'https://git.example.com/octo/hello-forgejo/actions?workflow=check.yaml' \
     'logo=forgejo'
@@ -172,13 +175,14 @@ test_gitea() (
   cd "$project"
   git add -A
   git commit --quiet --message 'Initial commit'
-  # Gitea, GitHub mirror, no Forgejo, no Zed, no VS Code
-  printf '%s\n' Gitea y git@github.com:octo/hello-mirror.git n n n | bash ./init.sh 'Hello Gitea' 'Says hello'
+  # Gitea, GitHub mirror, no Forgejo, no Zed, no VS Code, Claude Code
+  printf '%s\n' Gitea y git@github.com:octo/hello-mirror.git n n n y | bash ./init.sh 'Hello Gitea' 'Says hello'
 
   assert_initialized test@example.com
   assert_eq "$(git remote)" $'github\norigin' remotes
   assert_eq "$(git remote get-url github)" git@github.com:octo/hello-mirror.git 'github remote'
   assert_missing .forgejo .zed .vscode
+  [[ -L .claude/skills ]] || fail '.claude/skills is missing'
   assert_contains README.md \
     'https://gitea.example.com/octo/hello-gitea/actions?workflow=check.yaml' \
     'logo=gitea'
