@@ -17,7 +17,7 @@
   // fix PRs for vulnerable dependencies, from osv.dev.
   // nix and actions are not in osv.dev, so this covers languages added later
   "osvVulnerabilityAlerts": true,
-  "dependencyDashboardOSVVulnerabilitySummary": "unresolved",
+  "dependencyDashboard": { "osvVulnerabilitySummary": "unresolved" },
   "vulnerabilityAlerts": {
     "addLabels": ["security"],
     "automerge": true
